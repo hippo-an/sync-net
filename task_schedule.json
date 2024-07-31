@@ -12,8 +12,8 @@
       "id": 2,
       "name": "File Change Detection",
       "subtasks": [
-        "Implement file system watcher using fsnotify or similar package.",
-        "Develop functionality to detect file creation, modification, and deletion events.",
+        "✅ Implement file system watcher using fsnotify or similar package.",
+        "✅ Develop functionality to detect file creation, modification, and deletion events.",
         "Test file change detection for various scenarios."
       ]
     },
