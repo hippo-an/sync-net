@@ -30,7 +30,7 @@ func main() {
 				log.Printf("Modify event: %+v", me)
 			case de := <-w.DeleteEventChan:
 				log.Printf("Delete event: %+v", de)
-			case <-w.Done:
+			case <-w.DoneChan:
 				wg.Done()
 				break
 			case err := <-w.ErrorChan:

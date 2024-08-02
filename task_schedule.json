@@ -14,7 +14,8 @@
       "subtasks": [
         "✅ Implement file system watcher using fsnotify or similar package.",
         "✅ Develop functionality to detect file creation, modification, and deletion events.",
-        "Test file change detection for various scenarios."
+        "✅ Test file change detection for various scenarios.",
+        "Update teardown in nice way"
       ]
     },
     {
