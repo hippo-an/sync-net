@@ -12,8 +12,6 @@ import (
 
 const (
 	broadcastPort = 9999
-	serverIP      = "0.0.0.0"
-	broadcastIP   = "255.255.255.255"
 )
 
 type Server struct {
@@ -76,10 +74,10 @@ func (s *Server) add(ip string) {
 	}
 }
 
-func (s *Server) listen() {
+func (s *Server) Listen() {
 	addr := net.UDPAddr{
 		Port: broadcastPort,
-		IP:   net.ParseIP(serverIP),
+		IP:   net.IPv4zero,
 	}
 
 	conn, err := net.ListenUDP("udp", &addr)
@@ -121,7 +119,6 @@ func (s *Server) listen() {
 			)
 			continue
 		}
-
 		s.add(ip)
 	}
 }

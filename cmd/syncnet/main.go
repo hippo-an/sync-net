@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/hippo-an/sync-net/pkg/discovery"
 	"github.com/hippo-an/sync-net/pkg/utils"
 	"github.com/hippo-an/sync-net/pkg/watcher"
 	"log"
@@ -39,5 +40,10 @@ func main() {
 		}
 	}()
 
+	server := discovery.NewServer()
+	go server.Listen()
+
+	b := discovery.NewBroadcaster()
+	go b.Broadcast()
 	wg.Wait()
 }

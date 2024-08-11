@@ -10,10 +10,9 @@ import (
 )
 
 func TestMain(m *testing.M) {
-
 	s := NewServer()
 
-	go s.listen()
+	go s.Listen()
 
 	time.Sleep(1 * time.Second)
 	os.Exit(m.Run())
@@ -22,7 +21,7 @@ func TestMain(m *testing.M) {
 var (
 	serverAddr = net.UDPAddr{
 		Port: broadcastPort,
-		IP:   net.ParseIP(broadcastIP),
+		IP:   net.IPv4bcast,
 	}
 )
 
