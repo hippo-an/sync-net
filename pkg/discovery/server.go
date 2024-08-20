@@ -3,6 +3,7 @@ package discovery
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"log"
 	"net"
@@ -12,6 +13,7 @@ import (
 
 const (
 	broadcastPort = 9999
+	tcpPort       = 9000
 )
 
 type Server struct {
@@ -29,6 +31,7 @@ func NewServer() *Server {
 	s := ServerInfo{
 		Id:        uuid.New(),
 		Ip:        ip,
+		Port:      fmt.Sprint(tcpPort),
 		CreatedAt: now,
 		UpdatedAt: now,
 		Self:      true,
@@ -48,6 +51,7 @@ type Message struct {
 type ServerInfo struct {
 	Id        uuid.UUID `json:"id"`
 	Ip        string    `json:"ip"`
+	Port      string    `json:"port"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	Self      bool      `json:"self"`

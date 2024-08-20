@@ -42,6 +42,7 @@ type Event struct {
 	Name       string
 	Path       string
 	FullPath   string
+	Size       int64
 	FileType   FileType
 	EventType  EventType
 	ModifiedAt time.Time
@@ -169,6 +170,7 @@ func getEvent(eventType EventType, fullPath string) (*Event, error) {
 	var name, path string
 	var fileType FileType
 	var modifiedAt time.Time
+	var size int64
 
 	switch eventType {
 	case Create, Modify:
@@ -186,17 +188,20 @@ func getEvent(eventType EventType, fullPath string) (*Event, error) {
 			fileType = File
 		}
 		modifiedAt = info.ModTime()
+		size = info.Size()
 	case Delete:
 		path, name = filepath.Split(fullPath)
 		path = strings.TrimSuffix(path, "/")
 		fileType = Deleted
 		modifiedAt = time.Now()
+		size = 0
 	}
 
 	return &Event{
 		Name:       name,
 		Path:       path,
 		FullPath:   fullPath,
+		Size:       size,
 		EventType:  eventType,
 		FileType:   fileType,
 		ModifiedAt: modifiedAt,

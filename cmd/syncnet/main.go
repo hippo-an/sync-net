@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/hippo-an/sync-net/pkg/discovery"
+	"github.com/hippo-an/sync-net/pkg/transfer"
 	"github.com/hippo-an/sync-net/pkg/utils"
 	"github.com/hippo-an/sync-net/pkg/watcher"
 	"log"
@@ -22,28 +23,14 @@ func main() {
 	wg.Add(1)
 	go watcher.StartWatch(w)
 
-	go func() {
-		for {
-			select {
-			case ce := <-w.CreateEventChan:
-				log.Printf("Create event: %+v", ce)
-			case me := <-w.ModifyEventChan:
-				log.Printf("Modify event: %+v", me)
-			case de := <-w.DeleteEventChan:
-				log.Printf("Delete event: %+v", de)
-			case <-w.DoneChan:
-				wg.Done()
-				break
-			case err := <-w.ErrorChan:
-				log.Printf("Error: %+v", err)
-			}
-		}
-	}()
-
 	server := discovery.NewServer()
 	go server.Listen()
 
 	b := discovery.NewBroadcaster()
 	go b.Broadcast()
+
+	client := transfer.NewClient(w, server)
+	go client.HandleEvents()
+
 	wg.Wait()
 }
