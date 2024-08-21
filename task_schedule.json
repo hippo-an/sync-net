@@ -22,10 +22,10 @@
       "id": 3,
       "name": "File Transfer",
       "subtasks": [
-        "Design and implement a file transfer protocol.",
-        "Develop functionality to send files over the network to target devices.",
-        "Implement error handling and retries for file transfers.",
-        "Test file transfer functionality with different file sizes and types."
+        "✅ Design and implement a file transfer protocol.",
+        "✅ Develop functionality to send files over the network to target devices.",
+        "✅ Implement error handling and retries for file transfers.",
+        "💬 Test file transfer functionality with different file sizes and types."
       ]
     },
     {

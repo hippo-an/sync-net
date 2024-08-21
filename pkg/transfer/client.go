@@ -1,6 +1,7 @@
 package transfer
 
 import (
+	"encoding/binary"
 	"fmt"
 	"github.com/hippo-an/sync-net/pkg/discovery"
 	"github.com/hippo-an/sync-net/pkg/watcher"
@@ -93,9 +94,13 @@ func fileTransfer(conn net.Conn, fileName string) error {
 	buffer := make([]byte, bufferSize)
 	for {
 		n, err := file.Read(buffer)
-		if err != nil && err != io.EOF {
-			log.Printf("Error reading file %s: %s\n", fileName, err)
-			return err
+		if err != nil {
+			if err != io.EOF {
+				log.Printf("Error reading file %s: %s\n", fileName, err)
+				return err
+			}
+
+			return nil
 		}
 
 		if n == 0 {
@@ -115,9 +120,19 @@ func fileTransfer(conn net.Conn, fileName string) error {
 }
 
 func handshake(conn net.Conn, message string) error {
-	_, err := conn.Write([]byte(message))
+	size := int64(len(message))
+	sizeBytes := make([]byte, 8)
+	binary.BigEndian.PutUint64(sizeBytes, uint64(size))
+
+	_, err := conn.Write(sizeBytes)
 	if err != nil {
 		return err
 	}
+
+	_, err = conn.Write([]byte(message))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

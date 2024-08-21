@@ -23,14 +23,17 @@ func main() {
 	wg.Add(1)
 	go watcher.StartWatch(w)
 
-	server := discovery.NewServer()
-	go server.Listen()
+	ds := discovery.NewServer()
+	go ds.Listen()
 
 	b := discovery.NewBroadcaster()
 	go b.Broadcast()
 
-	client := transfer.NewClient(w, server)
+	client := transfer.NewClient(w, ds)
 	go client.HandleEvents()
+
+	ts := transfer.NewServer()
+	go ts.Listen()
 
 	wg.Wait()
 }

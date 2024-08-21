@@ -1,6 +1,7 @@
 package transfer
 
 import (
+	"encoding/binary"
 	"fmt"
 	"github.com/hippo-an/sync-net/pkg/discovery"
 	"github.com/hippo-an/sync-net/pkg/watcher"
@@ -9,6 +10,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 )
@@ -64,10 +66,13 @@ func TestHandshake(t *testing.T) {
 		require.NoError(t, err)
 		defer conn.Close()
 
-		buffer := make([]byte, 1024)
+		buffer := make([]byte, 8)
 		n, err := conn.Read(buffer)
 		require.NoError(t, err)
 
+		size := binary.BigEndian.Uint64(buffer[:8])
+		buffer = make([]byte, size)
+		n, err = conn.Read(buffer)
 		require.Equal(t, string(buffer[:n]), "1:/test/file.txt")
 	}()
 
@@ -93,7 +98,10 @@ func TestFileTransfer(t *testing.T) {
 	require.NoError(t, err)
 	defer listener.Close()
 
-	go func() {
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func(w *sync.WaitGroup) {
+		defer w.Done()
 		conn, err := listener.Accept()
 		require.NoError(t, err)
 		defer conn.Close()
@@ -102,12 +110,13 @@ func TestFileTransfer(t *testing.T) {
 		require.NoError(t, err)
 
 		require.Equal(t, receivedContent, testContent)
-	}()
+	}(&wg)
 
 	conn, err := net.Dial("tcp", listener.Addr().String())
 	require.NoError(t, err)
-	defer conn.Close()
 
 	err = fileTransfer(conn, testFile)
 	require.NoError(t, err)
+	conn.Close()
+	wg.Wait()
 }
