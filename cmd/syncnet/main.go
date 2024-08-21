@@ -33,7 +33,7 @@ func main() {
 	go client.HandleEvents()
 
 	ts := transfer.NewServer()
-	go ts.Listen()
+	go ts.Listen(9000)
 
 	wg.Wait()
 }

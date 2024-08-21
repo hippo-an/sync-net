@@ -13,10 +13,6 @@ import (
 	"strings"
 )
 
-const (
-	tcpPort = 9000
-)
-
 type Server struct {
 }
 
@@ -25,10 +21,6 @@ func NewServer() *Server {
 }
 
 func (s *Server) Listen(port int) {
-
-	if port == 0 {
-		port = tcpPort
-	}
 	conn, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatal("Error starting server:", err)
