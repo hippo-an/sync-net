@@ -1,0 +1,5 @@
+consistency:
+  onConflict: overwrite  # overwrite | backupAndOverwrite
+
+watcher:
+  path: /opt/sync-net/
