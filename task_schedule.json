@@ -50,9 +50,9 @@
       "id": 6,
       "name": "Initial Setup and Configuration",
       "subtasks": [
-        "Create configuration files or interface for setting up directories and devices.",
-        "Develop and integrate a user interface for initial setup.",
-        "Test configuration and setup process for ease of use."
+        "✅ Create configuration files or interface for setting up directories and devices.",
+        "✅ Develop and integrate a user interface for initial setup.",
+        "✅ Test configuration and setup process for ease of use."
       ]
     },
     {
