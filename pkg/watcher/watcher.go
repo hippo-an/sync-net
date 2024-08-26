@@ -2,6 +2,7 @@ package watcher
 
 import (
 	"github.com/fsnotify/fsnotify"
+	"github.com/hippo-an/sync-net/pkg/config"
 	"log"
 	"os"
 	"path/filepath"
@@ -66,7 +67,7 @@ func (w *Watcher) AddAll(path string) error {
 	})
 }
 
-func NewWatcher(path string) (*Watcher, error) {
+func NewWatcher(conf *config.Config) (*Watcher, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
@@ -74,7 +75,7 @@ func NewWatcher(path string) (*Watcher, error) {
 
 	w := &Watcher{
 		Watcher:         watcher,
-		BasePath:        path,
+		BasePath:        conf.Watcher.Path,
 		CreateEventChan: make(chan *Event),
 		ModifyEventChan: make(chan *Event),
 		DeleteEventChan: make(chan *Event),
@@ -83,7 +84,7 @@ func NewWatcher(path string) (*Watcher, error) {
 		StopChan:        make(chan struct{}),
 	}
 
-	err = w.AddAll(path)
+	err = w.AddAll(conf.Watcher.Path)
 
 	if err != nil {
 		return nil, err

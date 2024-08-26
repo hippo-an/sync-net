@@ -2,15 +2,26 @@ package discovery
 
 import (
 	"encoding/json"
+	"github.com/hippo-an/sync-net/pkg/config"
 	"github.com/stretchr/testify/require"
+	"log"
 	"net"
 	"os"
 	"testing"
 	"time"
 )
 
+var (
+	conf *config.Config
+)
+
 func TestMain(m *testing.M) {
-	s := NewServer()
+	c, err := config.NewConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	conf = c
+	s := NewServer(c)
 
 	go s.Listen()
 
@@ -18,14 +29,8 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-var (
-	serverAddr = net.UDPAddr{
-		Port: broadcastPort,
-		IP:   net.IPv4bcast,
-	}
-)
-
 func TestUDPBroadcastHandling(t *testing.T) {
+
 	message := Message{
 		Hash: generateHash(),
 	}
@@ -40,7 +45,10 @@ func TestUDPBroadcastHandling(t *testing.T) {
 	jsonData2, err := json.Marshal(message)
 	require.NoError(t, err)
 
-	conn, err := net.DialUDP("udp", nil, &serverAddr)
+	conn, err := net.DialUDP("udp", nil, &net.UDPAddr{
+		Port: conf.Discovery.BroadcastPort,
+		IP:   net.IPv4bcast,
+	})
 	require.NoError(t, err, "failed to create UDP client connection")
 	defer conn.Close()
 

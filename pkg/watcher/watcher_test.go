@@ -1,6 +1,7 @@
 package watcher
 
 import (
+	"github.com/hippo-an/sync-net/pkg/config"
 	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
@@ -35,10 +36,18 @@ func create(t *testing.T, w *Watcher) string {
 	return testFile
 }
 
-func TestFileCreate(t *testing.T) {
-	td := t.TempDir()
+func createConf(t *testing.T) *config.Config {
+	t.Helper()
+	conf, err := config.NewConfig()
+	require.NoError(t, err)
+	conf.Watcher.Path = t.TempDir()
 
-	w, err := NewWatcher(td)
+	return conf
+}
+
+func TestFileCreate(t *testing.T) {
+	conf := createConf(t)
+	w, err := NewWatcher(conf)
 	require.NoError(t, err)
 
 	defer w.TearDown()
@@ -49,9 +58,9 @@ func TestFileCreate(t *testing.T) {
 }
 
 func TestFileModify(t *testing.T) {
-	td := t.TempDir()
+	conf := createConf(t)
 
-	w, err := NewWatcher(td)
+	w, err := NewWatcher(conf)
 	require.NoError(t, err)
 
 	defer w.TearDown()
@@ -66,8 +75,8 @@ func TestFileModify(t *testing.T) {
 	select {
 	case e := <-w.ModifyEventChan:
 		require.Equal(t, testFileName, e.Name)
-		require.Equal(t, td, e.Path)
-		require.Equal(t, td+"/"+testFileName, e.FullPath)
+		require.Equal(t, conf.Watcher.Path, e.Path)
+		require.Equal(t, conf.Watcher.Path+"/"+testFileName, e.FullPath)
 		require.Equal(t, File, e.FileType)
 		require.Equal(t, Modify, e.EventType)
 		require.WithinDuration(t, time.Now(), e.ModifiedAt, time.Second)
@@ -78,9 +87,9 @@ func TestFileModify(t *testing.T) {
 }
 
 func TestFileDelete(t *testing.T) {
-	td := t.TempDir()
+	conf := createConf(t)
 
-	w, err := NewWatcher(td)
+	w, err := NewWatcher(conf)
 	require.NoError(t, err)
 
 	defer w.TearDown()
@@ -94,8 +103,8 @@ func TestFileDelete(t *testing.T) {
 	select {
 	case e := <-w.DeleteEventChan:
 		require.Equal(t, testFileName, e.Name)
-		require.Equal(t, td, e.Path)
-		require.Equal(t, td+"/"+testFileName, e.FullPath)
+		require.Equal(t, conf.Watcher.Path, e.Path)
+		require.Equal(t, conf.Watcher.Path+"/"+testFileName, e.FullPath)
 		require.Equal(t, Deleted, e.FileType)
 		require.Equal(t, Delete, e.EventType)
 		require.WithinDuration(t, time.Now(), e.ModifiedAt, time.Second)
@@ -106,15 +115,15 @@ func TestFileDelete(t *testing.T) {
 }
 
 func TestNestedFolderCreate(t *testing.T) {
-	td := t.TempDir()
+	conf := createConf(t)
 
-	w, err := NewWatcher(td)
+	w, err := NewWatcher(conf)
 	require.NoError(t, err)
 	defer w.TearDown()
 
 	go StartWatch(w)
 
-	nestedDir := filepath.Join(td, "nested", "folder", "structure")
+	nestedDir := filepath.Join(conf.Watcher.Path, "nested", "folder", "structure")
 	err = os.MkdirAll(nestedDir, 0755)
 	require.NoError(t, err)
 

@@ -3,6 +3,7 @@ package transfer
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/hippo-an/sync-net/pkg/config"
 	"github.com/hippo-an/sync-net/pkg/discovery"
 	"github.com/hippo-an/sync-net/pkg/watcher"
 	"github.com/stretchr/testify/require"
@@ -18,7 +19,12 @@ import (
 func TestNewClient(t *testing.T) {
 	w := &watcher.Watcher{}
 	s := &discovery.Server{}
-	client := NewClient(w, s)
+	conf, err := config.NewConfig()
+	if err != nil {
+		require.NoError(t, err)
+	}
+
+	client := NewClient(conf, w, s)
 
 	require.Equal(t, client.w, w)
 	require.Equal(t, client.s, s)
@@ -37,7 +43,11 @@ func TestHandleEvents(t *testing.T) {
 			"127.0.0.1": {Ip: "127.0.0.1", Port: "8080", Self: false},
 		},
 	}
-	client := NewClient(w, s)
+	conf, err := config.NewConfig()
+	if err != nil {
+		require.NoError(t, err)
+	}
+	client := NewClient(conf, w, s)
 
 	go client.HandleEvents()
 
@@ -79,12 +89,16 @@ func TestHandshake(t *testing.T) {
 	conn, err := net.Dial("tcp", listener.Addr().String())
 	require.NoError(t, err)
 	defer conn.Close()
+	conf, err := config.NewConfig()
+	require.NoError(t, err)
 
-	err = handshake(conn, "1:/test/file.txt")
+	c := NewClient(conf, nil, nil)
+	err = c.handshake(conn, "1:/test/file.txt")
 	require.NoError(t, err)
 }
 
 func TestFileTransfer(t *testing.T) {
+
 	tempDir, err := os.MkdirTemp("", "file-transfer-test")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
@@ -115,7 +129,11 @@ func TestFileTransfer(t *testing.T) {
 	conn, err := net.Dial("tcp", listener.Addr().String())
 	require.NoError(t, err)
 
-	err = fileTransfer(conn, testFile)
+	conf, err := config.NewConfig()
+	require.NoError(t, err)
+
+	c := NewClient(conf, nil, nil)
+	err = c.fileTransfer(conn, testFile)
 	require.NoError(t, err)
 	conn.Close()
 	wg.Wait()

@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"github.com/hippo-an/sync-net/pkg/config"
 	"github.com/hippo-an/sync-net/pkg/watcher"
 	"io"
 	"log"
@@ -14,13 +15,16 @@ import (
 )
 
 type Server struct {
+	conf *config.Config
 }
 
-func NewServer() *Server {
-	return &Server{}
+func NewServer(conf *config.Config) *Server {
+	return &Server{
+		conf: conf,
+	}
 }
 
-func (s *Server) Listen(port int) {
+func (s *Server) ListenAndConnect(port int) {
 	conn, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatal("Error starting server:", err)
@@ -110,7 +114,7 @@ func (s *Server) handleCreateEvent(conn net.Conn, filePath string) error {
 	}
 	defer file.Close()
 
-	buf := make([]byte, bufferSize)
+	buf := make([]byte, s.conf.Transfer.BufferSize)
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {
@@ -139,7 +143,7 @@ func (s *Server) handleModifyEvent(conn net.Conn, filePath string) error {
 	}
 	defer file.Close()
 
-	buf := make([]byte, bufferSize)
+	buf := make([]byte, s.conf.Transfer.BufferSize)
 	for {
 		n, err := conn.Read(buf)
 		if err != nil {

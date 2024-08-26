@@ -3,6 +3,7 @@ package transfer
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/hippo-an/sync-net/pkg/config"
 	"github.com/hippo-an/sync-net/pkg/discovery"
 	"github.com/hippo-an/sync-net/pkg/watcher"
 	"io"
@@ -13,15 +14,17 @@ import (
 )
 
 type Client struct {
-	w  *watcher.Watcher
-	s  *discovery.Server
-	wg sync.WaitGroup
+	conf *config.Config
+	w    *watcher.Watcher
+	s    *discovery.Server
+	wg   sync.WaitGroup
 }
 
-func NewClient(w *watcher.Watcher, s *discovery.Server) *Client {
+func NewClient(conf *config.Config, w *watcher.Watcher, s *discovery.Server) *Client {
 	return &Client{
-		w: w,
-		s: s,
+		conf: conf,
+		w:    w,
+		s:    s,
 	}
 }
 
@@ -61,14 +64,14 @@ func (c *Client) handleEvent(event *watcher.Event) {
 			}
 			defer conn.Close()
 
-			err = handshake(conn, fmt.Sprintf("%d:%s", event.EventType, event.FullPath))
+			err = c.handshake(conn, fmt.Sprintf("%d:%s", event.EventType, event.FullPath))
 			if err != nil {
 				log.Printf("Failed to handshake with server %+v: %s\n", s, err)
 				return
 			}
 
 			if event.EventType != watcher.Delete {
-				err := fileTransfer(conn, event.Name)
+				err := c.fileTransfer(conn, event.Name)
 				if err != nil {
 					log.Printf("Failed to send file %+v: %s\n", s, err)
 					return
@@ -81,9 +84,7 @@ func (c *Client) handleEvent(event *watcher.Event) {
 	log.Println("File successfully sent to all servers.")
 }
 
-const bufferSize = 32 * 1024
-
-func fileTransfer(conn net.Conn, fileName string) error {
+func (c *Client) fileTransfer(conn net.Conn, fileName string) error {
 	file, err := os.Open(fileName)
 	if err != nil {
 		log.Printf("Failed to open file %s: %s\n", fileName, err)
@@ -91,7 +92,7 @@ func fileTransfer(conn net.Conn, fileName string) error {
 	}
 	defer file.Close()
 
-	buffer := make([]byte, bufferSize)
+	buffer := make([]byte, c.conf.Transfer.BufferSize)
 	for {
 		n, err := file.Read(buffer)
 		if err != nil {
@@ -119,7 +120,7 @@ func fileTransfer(conn net.Conn, fileName string) error {
 	return nil
 }
 
-func handshake(conn net.Conn, message string) error {
+func (c *Client) handshake(conn net.Conn, message string) error {
 	size := int64(len(message))
 	sizeBytes := make([]byte, 8)
 	binary.BigEndian.PutUint64(sizeBytes, uint64(size))

@@ -1,6 +1,7 @@
 package transfer
 
 import (
+	"github.com/hippo-an/sync-net/pkg/config"
 	"github.com/hippo-an/sync-net/pkg/watcher"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -12,7 +13,11 @@ import (
 )
 
 func TestHandleCreateEvent(t *testing.T) {
-	s := NewServer()
+	conf, err := config.NewConfig()
+	if err != nil {
+		require.NoError(t, err)
+	}
+	s := NewServer(conf)
 	tempDir, err := os.MkdirTemp("", "server-test")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
@@ -51,7 +56,11 @@ func TestHandleCreateEvent(t *testing.T) {
 }
 
 func TestHandleModifyEvent(t *testing.T) {
-	s := NewServer()
+	conf, err := config.NewConfig()
+	if err != nil {
+		require.NoError(t, err)
+	}
+	s := NewServer(conf)
 	tempDir, err := os.MkdirTemp("", "server-test")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
@@ -92,7 +101,11 @@ func TestHandleModifyEvent(t *testing.T) {
 }
 
 func TestHandleDeleteEvent(t *testing.T) {
-	s := NewServer()
+	conf, err := config.NewConfig()
+	if err != nil {
+		require.NoError(t, err)
+	}
+	s := NewServer(conf)
 	tempDir, err := os.MkdirTemp("", "server-test")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)

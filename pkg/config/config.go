@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 var rootDir = GetProjectRoot()
@@ -36,6 +37,17 @@ type Config struct {
 	Watcher struct {
 		Path string `yaml:"path"`
 	} `yaml:"watcher"`
+
+	Discovery struct {
+		BroadcastPort     int           `yaml:"broadcastPort"`
+		TcpPort           int           `yaml:"tcpPort"`
+		BroadcastInterval time.Duration `yaml:"broadcastInterval"`
+		BufferSize        int           `yaml:"bufferSize"`
+	} `yaml:"discovery"`
+
+	Transfer struct {
+		BufferSize int `yaml:"bufferSize"`
+	} `yaml:"transfer"`
 }
 
 func NewConfig() (*Config, error) {

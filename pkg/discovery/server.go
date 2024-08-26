@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/hippo-an/sync-net/pkg/config"
 	"log"
 	"net"
 	"os"
@@ -18,9 +19,10 @@ const (
 
 type Server struct {
 	ServerInfos map[string]*ServerInfo
+	conf        *config.Config
 }
 
-func NewServer() *Server {
+func NewServer(conf *config.Config) *Server {
 	now := time.Now()
 
 	ip, err := getIp()
@@ -31,7 +33,7 @@ func NewServer() *Server {
 	s := ServerInfo{
 		Id:        uuid.New(),
 		Ip:        ip,
-		Port:      fmt.Sprint(tcpPort),
+		Port:      fmt.Sprint(conf.Discovery.TcpPort),
 		CreatedAt: now,
 		UpdatedAt: now,
 		Self:      true,
@@ -41,6 +43,7 @@ func NewServer() *Server {
 		ServerInfos: map[string]*ServerInfo{
 			ip: &s,
 		},
+		conf: conf,
 	}
 }
 
@@ -80,7 +83,7 @@ func (s *Server) add(ip string) {
 
 func (s *Server) Listen() {
 	addr := net.UDPAddr{
-		Port: broadcastPort,
+		Port: s.conf.Discovery.BroadcastPort,
 		IP:   net.IPv4zero,
 	}
 
@@ -93,7 +96,7 @@ func (s *Server) Listen() {
 	defer conn.Close()
 	log.Println("Listening for broadcast messages...")
 
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, s.conf.Discovery.BufferSize)
 	for {
 		n, clientAddr, err := conn.ReadFromUDP(buffer)
 		if err != nil {

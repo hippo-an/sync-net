@@ -2,33 +2,36 @@ package discovery
 
 import (
 	"encoding/json"
+	"github.com/hippo-an/sync-net/pkg/config"
 	"log"
 	"net"
 	"time"
 )
 
 type Broadcaster struct {
-	Addr *net.UDPAddr
+	addr *net.UDPAddr
+	conf *config.Config
 }
 
-func NewBroadcaster() *Broadcaster {
+func NewBroadcaster(conf *config.Config) *Broadcaster {
 	return &Broadcaster{
-		Addr: &net.UDPAddr{
-			Port: broadcastPort,
+		addr: &net.UDPAddr{
+			Port: conf.Discovery.BroadcastPort,
 			IP:   net.IPv4bcast,
 		},
+		conf: conf,
 	}
 }
 
 func (b *Broadcaster) Broadcast() {
-	conn, err := net.DialUDP("udp", nil, b.Addr)
+	conn, err := net.DialUDP("udp", nil, b.addr)
 	if err != nil {
 		log.Println("Error setting up UDP connection:", err)
 		return
 	}
 	defer conn.Close()
 
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(b.conf.Discovery.BroadcastInterval)
 	defer ticker.Stop()
 
 	err = notify(conn)
