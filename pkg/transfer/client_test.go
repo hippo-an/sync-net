@@ -40,7 +40,7 @@ func TestHandleEvents(t *testing.T) {
 	}
 	s := &discovery.Server{
 		ServerInfos: map[string]*discovery.ServerInfo{
-			"127.0.0.1": {Ip: "127.0.0.1", Port: "8080", Self: false},
+			"127.0.0.1": {Ip: "127.0.0.1", Port: "0", Self: false},
 		},
 	}
 	conf, err := config.NewConfig()
@@ -71,7 +71,10 @@ func TestHandshake(t *testing.T) {
 	require.NoError(t, err)
 	defer listener.Close()
 
-	go func() {
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func(w *sync.WaitGroup) {
+		defer w.Done()
 		conn, err := listener.Accept()
 		require.NoError(t, err)
 		defer conn.Close()
@@ -84,7 +87,7 @@ func TestHandshake(t *testing.T) {
 		buffer = make([]byte, size)
 		n, err = conn.Read(buffer)
 		require.Equal(t, string(buffer[:n]), "1:/test/file.txt")
-	}()
+	}(&wg)
 
 	conn, err := net.Dial("tcp", listener.Addr().String())
 	require.NoError(t, err)
@@ -95,10 +98,10 @@ func TestHandshake(t *testing.T) {
 	c := NewClient(conf, nil, nil)
 	err = c.handshake(conn, "1:/test/file.txt")
 	require.NoError(t, err)
+	wg.Wait()
 }
 
 func TestFileTransfer(t *testing.T) {
-
 	tempDir, err := os.MkdirTemp("", "file-transfer-test")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)

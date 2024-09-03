@@ -1,8 +1,7 @@
 transfer:
   bufferSize: 32768
-
-consistency:
-  onConflict: overwrite  # overwrite | backupAndOverwrite
+  consistency:
+    onConflict: overwrite  # overwrite | backupAndCreate
 
 watcher:
   path: /opt/sync-net/

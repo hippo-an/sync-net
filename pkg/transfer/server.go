@@ -136,6 +136,54 @@ func (s *Server) handleCreateEvent(conn net.Conn, filePath string) error {
 func (s *Server) handleModifyEvent(conn net.Conn, filePath string) error {
 	log.Println("Received file modify event for:", filePath)
 
+	err := s.checkConsistency(
+		func() error {
+			if _, err := os.Stat(filePath); err == nil {
+				backupPath := filePath + ".backup"
+				log.Println("Backing up existing file to:", backupPath)
+
+				srcFile, err := os.Open(filePath)
+				if err != nil {
+					log.Println("Error opening source file for backup:", err)
+					return err
+				}
+				defer srcFile.Close()
+
+				destFile, err := os.Create(backupPath)
+				if err != nil {
+					log.Println("Error creating backup file:", err)
+					return err
+				}
+				defer destFile.Close()
+
+				if _, err := io.Copy(destFile, srcFile); err != nil {
+					log.Println("Error copying file contents to backup:", err)
+					return err
+				}
+
+				log.Println("Backup completed successfully")
+
+				file, err := os.Create(filePath)
+				if err != nil {
+					log.Println("Error creating file:", err)
+					return err
+				}
+
+				defer file.Close()
+			}
+
+			return nil
+		},
+		func() error {
+			log.Println("Overwriting existing file if it exists:", filePath)
+			return nil
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
 	file, err := os.OpenFile(filePath, os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Println("Error opening file:", err)
@@ -174,11 +222,78 @@ func (s *Server) handleModifyEvent(conn net.Conn, filePath string) error {
 func (s *Server) handleDeleteEvent(filePath string) error {
 	log.Println("Received file delete event for:", filePath)
 
-	err := os.Remove(filePath)
+	err := s.checkConsistency(
+		func() error {
+			if _, err := os.Stat(filePath); err == nil {
+				backupPath := filePath + ".backup"
+				log.Println("Backing up existing file to:", backupPath)
+
+				srcFile, err := os.Open(filePath)
+				if err != nil {
+					log.Println("Error opening source file for backup:", err)
+					return err
+				}
+				defer srcFile.Close()
+
+				destFile, err := os.Create(backupPath)
+				if err != nil {
+					log.Println("Error creating backup file:", err)
+					return err
+				}
+				defer destFile.Close()
+
+				if _, err := io.Copy(destFile, srcFile); err != nil {
+					log.Println("Error copying file contents to backup:", err)
+					return err
+				}
+
+				log.Println("Backup completed successfully")
+
+				file, err := os.Create(filePath)
+				if err != nil {
+					log.Println("Error creating file:", err)
+					return err
+				}
+
+				defer file.Close()
+			}
+
+			return nil
+		},
+		func() error {
+			log.Println("Overwriting existing file if it exists:", filePath)
+			return nil
+		},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(filePath)
 	if err != nil {
 		log.Println("Error deleting file:", err)
 		return err
 	}
 
+	return nil
+}
+
+func (s *Server) checkConsistency(backupAndCreate, overwrite func() error) error {
+	switch s.conf.Transfer.Consistency.OnConflict {
+	case "backupAndCreate":
+		err := backupAndCreate()
+		if err != nil {
+			return err
+		}
+	case "overwrite":
+		err := overwrite()
+		if err != nil {
+			return err
+		}
+	default:
+		log.Println("Invalid consistency option:", s.conf.Transfer.Consistency)
+		return fmt.Errorf("invalid consistency option: %s", s.conf.Transfer.Consistency)
+	}
 	return nil
 }

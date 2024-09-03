@@ -30,10 +30,6 @@ func GetProjectRoot() string {
 }
 
 type Config struct {
-	Consistency struct {
-		OnConflict string `yaml:"onConflict"`
-	} `yaml:"consistency"`
-
 	Watcher struct {
 		Path string `yaml:"path"`
 	} `yaml:"watcher"`
@@ -46,7 +42,10 @@ type Config struct {
 	} `yaml:"discovery"`
 
 	Transfer struct {
-		BufferSize int `yaml:"bufferSize"`
+		BufferSize  int `yaml:"bufferSize"`
+		Consistency struct {
+			OnConflict string `yaml:"onConflict"`
+		} `yaml:"consistency"`
 	} `yaml:"transfer"`
 }
 

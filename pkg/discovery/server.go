@@ -12,11 +12,6 @@ import (
 	"time"
 )
 
-const (
-	broadcastPort = 9999
-	tcpPort       = 9000
-)
-
 type Server struct {
 	ServerInfos map[string]*ServerInfo
 	conf        *config.Config

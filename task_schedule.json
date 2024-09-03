@@ -30,24 +30,15 @@
     },
     {
       "id": 4,
-      "name": "File Consistency Check",
-      "subtasks": [
-        "Implement file hashing (e.g., using SHA256) to compare files.",
-        "Develop functionality to verify synchronization status based on hash values.",
-        "Test file consistency checks to ensure accuracy."
-      ]
-    },
-    {
-      "id": 5,
       "name": "Conflict Resolution",
       "subtasks": [
         "Develop logic to detect and handle file conflicts (e.g., simultaneous modifications).",
-        "Implement user options for resolving conflicts (e.g., overwrite, backup).",
+        "✅ Implement user options for resolving conflicts (e.g., overwrite, backup).",
         "Test conflict resolution in scenarios with multiple concurrent modifications."
       ]
     },
     {
-      "id": 6,
+      "id": 5,
       "name": "Initial Setup and Configuration",
       "subtasks": [
         "✅ Create configuration files or interface for setting up directories and devices.",
@@ -56,7 +47,7 @@
       ]
     },
     {
-      "id": 7,
+      "id": 6,
       "name": "Logging and Notifications",
       "subtasks": [
         "Implement logging for synchronization events and errors.",
@@ -65,7 +56,7 @@
       ]
     },
     {
-      "id": 8,
+      "id": 7,
       "name": "Security",
       "subtasks": [
         "Implement encryption for file transfers to secure data.",
@@ -74,7 +65,7 @@
       ]
     },
     {
-      "id": 9,
+      "id": 8,
       "name": "Final Testing and Debugging",
       "subtasks": [
         "Perform end-to-end testing to validate all features.",
@@ -83,7 +74,7 @@
       ]
     },
     {
-      "id": 10,
+      "id": 9,
       "name": "Documentation and Deployment",
       "subtasks": [
         "Write comprehensive documentation (README, user guide).",
@@ -92,7 +83,7 @@
       ]
     },
     {
-      "id": 11,
+      "id": 10,
       "name": "Release and Maintenance",
       "subtasks": [
         "Release the application and provide support for initial users.",
